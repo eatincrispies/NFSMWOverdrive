@@ -96,22 +96,3 @@ Visual Studio, `Release|Win32`. Output is `Release/NFSMWOverdrive.asi`.
 | `src/Hook.cpp` | 5-byte JMP detour with trampoline and byte check |
 | `src/Config.cpp` | ini parsing |
 | `src/Log.cpp` | optional logging |
-
-### A note on the straight-cut whine
-
-Earlier versions carried an unfinished attempt at giving any car the M3 GTR's
-gear whine. It was removed because it never worked.
-
-For anyone tempted to try: `sub_4EC2F0` is **not** the whine. It passes the
-string `"Csis:Whine"` to a logging call, which is misleading — instrumenting it
-shows it never executes at all, including in a GTR that is audibly whining.
-The byte at `*(this+72)+49` is not a gate for it either; the GTR whines with
-that byte reading `0`.
-
-The likeliest explanation, untested: `CAR_TRANNY.abk` appears exactly once in
-the whole VLT, in the global bank manifest immediately after `CAR_99_ENG_MB_EE.abk`
-— the GTR's engine bank — and has no per-car reference anywhere. That suggests
-the whine is part of the GTR's engine audio package rather than a separately
-gated layer, which would make it a data problem, not an ASI one. A five-minute
-VltEd test — point another car's engine audio at the GTR's and listen — would
-confirm or kill that before anyone writes code.
