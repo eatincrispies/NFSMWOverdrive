@@ -42,49 +42,6 @@ Cars absent from that list — the M3 GTR, SL65, Camaro, 911 GT2, and every cop,
 traffic and semi entry — ship fully specced with no upgraded set to draw from.
 Cars that already have six gears are left alone.
 
-## How it works
-
-Every car ships two attribute sets: `<car>` and `<car>_top`, the fully-upgraded
-one. On a 5-speed car the stock `GEAR_RATIO` array holds seven entries (reverse,
-neutral, five gears) and the `_top` array holds eight.
-
-There is **no `NUM_RATIOS` field** anywhere in `attributes.bin` — MW takes the
-gear count straight from that array's length. The sixth gear exists only in the
-`_top` set, which is exactly why vanilla hands it over with the last package.
-
-Finding a customised car by its collection key does not work: the moment a part
-is fitted, MW synthesises a collection at runtime whose key is in no VLT file
-and changes every session. What is stable is the parent link:
-
-```
-+0x10   parent collection    customised Cobalt -> "cobaltss"
-                             stock "traffic"   -> "default"
-+0x18   GEAR_RATIO storage   [u16 capacity][u16 count][hdr][floats]
-+0x20   this collection's key
-```
-
-`count` is 7 on a 5-speed and 8 on a 6-speed; `capacity` is 9 either way — the
-class maximum — so the extra slot already exists. The plugin walks `+0x10` to
-identify the car, reads `<car>_top`'s ratios, copies them in and bumps `count`.
-Nothing is reallocated, and it refuses if the count would not fit, the memory
-is not writable, or the car already has enough gears.
-
-Because MW builds these collections per class, a runtime transmission
-collection only appears when the *transmission* was upgraded — which is what
-makes the trigger exact rather than approximate.
-
-Verified in-game: Cobalt SS on a Race gearbox pulls 6th; stock Cobalt stays at
-5; RX-7 with nitrous and a stock gearbox stays at 5.
-
-## Compatibility
-
-Reference build: `speed.exe`, 6,029,312 bytes, MD5
-`C0516B485065FABDD69579816B5DF763`.
-
-The plugin verifies the bytes at every address it touches before patching
-anything, and disables itself with a message box on a mismatch — a different
-executable cannot be corrupted by it.
-
 ## Build
 
 Visual Studio, `Release|Win32`. Output is `Release/NFSMWOverdrive.asi`.
