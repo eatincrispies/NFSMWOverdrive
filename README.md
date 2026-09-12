@@ -31,7 +31,7 @@ Fix.
 
 ## Cars
 
-Nothing is hardcoded — `[Cars]` in the ini is the full list of cars the plugin
+`[Cars]` in the ini is the full list of cars the plugin
 will touch, and it ships with the 31 stock cars that have an upgraded gear set:
 
 `911turbo` `997s` `a3` `a4` `carreragt` `caymans` `clio` `clk500` `cobaltss`
