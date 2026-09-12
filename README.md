@@ -44,13 +44,6 @@ will touch, and it ships with the 31 stock cars that have an upgraded gear set:
 Set one to `0` to leave that car alone. Add mod cars the same way, using the
 name exactly as VltEd shows it:
 
-```ini
-[Cars]
-cobaltss   = 1
-rx7        = 0
-skyliner34 = 1
-```
-
 ### Finding an add-on car's name
 
 The name is the one **NFS-VltEd** uses, which is often not the name on the car
