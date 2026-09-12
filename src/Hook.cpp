@@ -5,7 +5,6 @@
 
 namespace hook {
 namespace {
-
 constexpr uint8_t kJmpOpcode = 0xE9;
 constexpr size_t  kJmpSize   = 5;
 constexpr uint8_t kNopOpcode = 0x90;
@@ -16,8 +15,7 @@ void WriteRelativeJump(uint8_t* at, const void* destination) {
     at[0] = kJmpOpcode;
     memcpy(at + 1, &relative, sizeof(int32_t));
 }
-
-} // namespace
+}
 
 bool InstallDetour(uintptr_t      target,
                    const void*    detour,
@@ -54,5 +52,4 @@ bool InstallDetour(uintptr_t      target,
     *trampolineOut = trampoline;
     return true;
 }
-
-} // namespace hook
+}

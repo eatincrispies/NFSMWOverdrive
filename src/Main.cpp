@@ -1,15 +1,3 @@
-/*
- *  NFSMW Overdrive
- *
- *  An ASI plugin for Need for Speed: Most Wanted (2005, PC).
- *
- *  Five-speed cars get their 6th gear from the first transmission package
- *  instead of the last.
- *
- *  Reference build: speed.exe, 6,029,312 bytes,
- *  MD5 C0516B485065FABDD69579816B5DF763
- */
-
 #define WIN32_LEAN_AND_MEAN
 
 #include <windows.h>
@@ -22,12 +10,9 @@
 #include "Tweaks.h"
 
 namespace {
-
 HMODULE g_module  = nullptr;
 bool    g_started = false;
 
-// "<the folder this .asi lives in>\<name>". Everything the plugin reads or
-// writes sits beside the .asi, so it works wherever the loader puts it.
 void ModulePath(char* out, size_t size, const char* name) {
     char folder[MAX_PATH] = {};
     GetModuleFileNameA(g_module, folder, sizeof(folder));
@@ -49,8 +34,6 @@ void Complain(const char* detail) {
 }
 
 void Start() {
-    // Most MW loaders just LoadLibrary the .asi; some also call InitializeASI.
-    // Guard so the setup runs exactly once either way.
     if (g_started) return;
     g_started = true;
 
@@ -64,8 +47,6 @@ void Start() {
 
     char reason[256] = {};
 
-    // Check the bytes we are about to patch before touching anything, so a
-    // different executable fails here instead of crashing later.
     if (!game::VerifyBuild(reason, sizeof(reason))) {
         log::Write("build check failed: %s", reason);
         Complain(reason);
@@ -79,10 +60,8 @@ void Start() {
         log::Close();
     }
 }
+}
 
-} // namespace
-
-// ASI entry point, called by loaders that look for it.
 extern "C" __declspec(dllexport) void InitializeASI() {
     Start();
 }

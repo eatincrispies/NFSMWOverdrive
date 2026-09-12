@@ -6,13 +6,8 @@
 
 namespace game {
 namespace {
-
 using BStringHashFn = uint32_t(__cdecl*)(const char*);
 
-// First bytes of bStringHash at 0x005CC240.
-//   8B 44 24 04   mov  eax, [esp+4]
-//   85 C0         test eax, eax
-//   74 23         je   .empty
 const uint8_t kBStringHashBytes[] = { 0x8B, 0x44, 0x24, 0x04, 0x85, 0xC0, 0x74, 0x23 };
 
 bool RegionHasFlags(const void* address, size_t size, DWORD flags) {
@@ -30,8 +25,7 @@ bool RegionHasFlags(const void* address, size_t size, DWORD flags) {
     }
     return true;
 }
-
-} // namespace
+}
 
 bool IsReadable(const void* address, size_t size) {
     return RegionHasFlags(address, size,
@@ -88,8 +82,6 @@ bool VerifyBuild(char* reasonOut, size_t reasonSize) {
         }
     }
 
-    // If the game's own hasher does not reproduce a constant lifted straight
-    // out of the binary, nothing downstream is trustworthy.
     if (BStringHash("transmission") != kKeyTransmission ||
         BStringHash("default")      != kKeyDefault) {
         _snprintf_s(reasonOut, reasonSize, _TRUNCATE,
@@ -99,5 +91,4 @@ bool VerifyBuild(char* reasonOut, size_t reasonSize) {
 
     return true;
 }
-
-} // namespace game
+}

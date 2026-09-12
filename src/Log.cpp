@@ -6,12 +6,9 @@
 
 namespace log {
 namespace {
-
 FILE* g_file    = nullptr;
 bool  g_enabled = false;
 
-// Small fixed ring of messages already emitted, so Once() needs no allocator
-// inside a hot hook.
 constexpr int kSlots  = 32;
 constexpr int kLength = 128;
 
@@ -28,8 +25,7 @@ void Emit(const char* text) {
 bool Format(char* buffer, size_t size, const char* format, va_list args) {
     return _vsnprintf_s(buffer, size, _TRUNCATE, format, args) >= 0;
 }
-
-} // namespace
+}
 
 void Open(const char* path, bool enabled) {
     g_enabled = enabled;
@@ -78,5 +74,4 @@ void Once(const char* format, ...) {
 
     Emit(buffer);
 }
-
-} // namespace log
+}
