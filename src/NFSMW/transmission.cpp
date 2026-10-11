@@ -155,7 +155,7 @@ namespace Settings {
 
 namespace {
 
-    constexpr const char* kVersion = "V1.1.0";
+    constexpr const char* kVersion = "V1.2.0";
 
     constexpr uintptr_t kAttrib_FindCollection               = 0x00455FD0u;
     constexpr uintptr_t kAttrib_Database_sThis               = 0x0090DCBCu;
