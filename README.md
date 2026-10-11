@@ -40,3 +40,8 @@ Fix.
 
 Visual Studio, `Release|Win32`. Output is `Release/NFSMWOverdrive.asi`. The
 `Debug|Win32` build is the same plugin with a log.
+
+## Credits
+
+`Eatincrispies` (Me, mod creator)
+`greedymanul` (Mod tester and reporter)
