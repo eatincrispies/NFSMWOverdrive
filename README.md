@@ -1,4 +1,4 @@
-![Thumbnail of the mod](./thumbnail.jpg)
+# NFSMW Overdrive
 
 An ASI plugin for *Need for Speed: Most Wanted* (2005, PC).
 
@@ -8,6 +8,11 @@ rather than making you wait for the Ultimate package.
 
 Cars with a stock gearbox are untouched, and upgrading anything else — engine,
 nitrous, tyres — does not trigger it.
+
+**The Ultimate transmission package brings the straight-cut gear whine.** MW
+only gives the M3 GTR's straight-cut gearbox sound to a car whose engine audio
+has it switched on in the VLT, so a car either has it or never will. With this
+plugin, beat Webster, fit the Ultimate transmission, and the whine kicks in.
 
 ## Install
 
@@ -26,71 +31,97 @@ Fix.
 | --- | --- | --- |
 | `[Gears] Enabled` | `1` | the feature |
 | `[Gears] IncludeStock` | `0` | also give the 6th to cars with no gearbox upgrade |
-| `[Debug] Log` | `0` | writes `NFSMWOverdrive.log` beside the `.asi` |
-| `[Debug] Verbose` | `0` | logs every transmission collection built |
+| `[Tranny] Enabled` | `1` | the straight-cut whine with the Ultimate transmission |
 
 ## Cars
 
-`[Cars]` in the ini is the full list of cars the plugin
-will touch, and it ships with the 31 stock cars that have an upgraded gear set:
+There is no car list. At startup the plugin reads every car's `pvehicle`
+entry in the VLT, which lists the transmissions the game uses for that car:
+the stock set first, the fully upgraded set last. Every car with two different
+sets gets the 6th gear, so add-on cars work as soon as they have an upgraded
+gear set, whatever it is called.
 
-`911turbo` `997s` `a3` `a4` `carreragt` `caymans` `clio` `clk500` `cobaltss`
-`corvette` `cts` `db9` `eclipsegt` `elise` `fordgt` `gallardo` `gti` `gto`
-`is300` `lancerevo8` `monaro` `murcielago` `mustanggt` `punto` `rx7` `rx8`
-`sl500` `slr` `supra` `tt` `viper`
+That also covers cars a name list could never find. The Impreza's stock gear
+set is not called `imprezawrx`, so it was missing from the old list; it is
+picked up now. Cars whose upgraded set has no extra gear, or that already have
+six, are left alone. The M3 GTR, SL65, Camaro and 911 GT2 ship fully specced
+with a single gear set, so there is nothing to draw from.
 
-Set one to `0` to leave that car alone. Add mod cars the same way, using the
-name exactly as VltEd shows it:
+The Debug build writes `NFSMWOverdrive.log` beside the `.asi`, listing every
+gear set pair it found and then each car as you drive it.
 
-### Finding an add-on car's name
+## How it works
 
-The name is the one **NFS-VltEd** uses, which is often not the name on the car
-lot or the folder:
+Every upgradable car ships two transmission sets, named in its `pvehicle`
+`transmission` list: the stock one and the fully upgraded one (`<car>_top` for
+most stock cars). On a 5-speed car the stock `GEAR_RATIO` array holds seven entries (reverse,
+neutral, five gears) and the `_top` array holds eight.
 
-1. Open your game in VltEd
-2. Open the **`transmission`** class in the tree
-3. Find your car there — that spelling is what goes in the ini
-4. Check whether a second entry exists with `_top` on the end
+There is **no `NUM_RATIOS` field** anywhere in `attributes.bin` — MW takes the
+gear count straight from that array's length. The sixth gear exists only in the
+`_top` set, which is exactly why vanilla hands it over with the last package.
 
-```
-mycar          the stock gear set
-mycar_top      the upgraded one, where the 6th gear lives
-```
-
-If both exist, add `mycar = 1`. **If there is no `mycar_top`, this plugin cannot
-help that car** — the sixth gear it would copy does not exist anywhere to copy
-from. Add-on cars cloned from a stock car usually have one; cars that simply
-reuse another car's transmission do not.
-
-Getting it wrong is harmless: an unknown name, a missing `_top`, or a `_top`
-with no extra gear is skipped and the car is left exactly as it was. Set
-`[Debug] Log = 1` and the log lists every name it read, then reports each car
-as you drive it:
+Finding a customised car by its collection key does not work: the moment a part
+is fitted, MW synthesises a collection at runtime whose key is in no VLT file
+and changes every session. What is stable is the parent link:
 
 ```
-cars: 911turbo 997s a3 ... viper skyliner34
-cobaltss: 5 -> 6 gears
-skyliner34: no _top gear set found, skipped
++0x10   parent collection    customised Cobalt -> "cobaltss"
+                             stock "traffic"   -> "default"
++0x18   GEAR_RATIO storage   [u16 capacity][u16 count][hdr][floats]
++0x20   this collection's key
 ```
 
-A name that never appears at all was not spelled the way the game spells it.
+`count` is 7 on a 5-speed and 8 on a 6-speed; `capacity` is 9 either way — the
+class maximum — so the extra slot already exists. The plugin walks `+0x10` to
+identify the car, reads `<car>_top`'s ratios, copies them in and bumps `count`.
+Nothing is reallocated, and it refuses if the count would not fit, the memory
+is not writable, or the car already has enough gears.
 
-Room for 128 entries. If the section is missing entirely the plugin falls back
-to a built-in copy of the same 31 names, so a lost ini does not disable it.
+Because MW builds these collections per class, a runtime transmission
+collection only appears when the *transmission* was upgraded — which is what
+makes the trigger exact rather than approximate.
 
-Stock cars deliberately absent: the M3 GTR, SL65, Camaro and 911 GT2 ship fully
-specced with no upgraded set to draw from, as do the cop, traffic and semi
-entries. Cars that already have six gears are left alone.
+Verified in-game: Cobalt SS on a Race gearbox pulls 6th; stock Cobalt stays at
+5; RX-7 with nitrous and a stock gearbox stays at 5.
+
+## The straight-cut whine
+
+The sound is `Csis::CAR_TRANNY`, from the global bank `CAR_TRANNY.abk`, which
+sits in the same always-loaded bank list as the traffic, rain and nitrous
+banks. `CARSFX_GinsuEngine::InitializeEngine` only creates it for the player's
+car, and only when the car's `engineaudio` collection has `Tranny` set; the M3
+GTR is the one stock car that does. Its volume follows your road speed.
+
+The plugin wraps `InitializeEngine`. When your car's transmission is at its
+highest package (`Physics::Upgrades::GetLevel` equals `GetMaxLevel` for
+`PUT_TRANSMISSION`), it raises `Tranny` for that one call, so the game builds
+the whine exactly as it does for the GTR, then puts the flag back. Nothing in
+the VLT changes, and AI cars sharing the same engine audio are not affected.
+
+The sound is set up when your car's audio is created, so a newly fitted
+Ultimate transmission is heard the next time the car loads.
+
+Earlier versions tried `Csis:Whine`. That is `CARSFX_Shift::PlayGearWhine`,
+the reverse-gear whine, not the straight-cut gearbox.
+
+## Compatibility
+
+Reference build: `speed.exe` v1.3, 6,029,312 bytes, MD5
+`C0516B485065FABDD69579816B5DF763`.
+
+Every patch checks the bytes it replaces first: each call it redirects must
+still call the game's own function, and each vtable slot must still hold the
+game's own `InitializeEngine`. Anything that does not match is left alone, so
+a different executable is never changed.
 
 ## Build
 
-Visual Studio, `Release|Win32`. Output is `Release/NFSMWOverdrive.asi`.
+Visual Studio, `Release|Win32`. Output is `Release/NFSMWOverdrive.asi`. The
+`Debug|Win32` build is the same plugin with a log.
 
 | | |
 | --- | --- |
-| `src/Game.h` | addresses and structure offsets, with the disassembly they came from |
-| `src/Main.cpp` | entry point, ini and log paths, build check |
-| `src/Tweaks.cpp` | the hook and the gear patch |
-| `src/Hook.cpp` | 5-byte JMP detour with trampoline and byte check |
-| `src/Config.cpp` | ini parsing |
-| `src/Log.cpp` | optional logging |
+| `src/dllmain.cpp` | entry point |
+| `src/NFSMW/transmission.hpp` | the game classes, with EA's names and layouts |
+| `src/NFSMW/transmission.cpp` | the ini, the 6th gear and the straight-cut whine |
