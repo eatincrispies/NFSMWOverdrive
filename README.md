@@ -1,3 +1,5 @@
+![Thumbnail of the mod](./thumbnail.jpg)
+
 # NFSMW Overdrive
 
 An ASI plugin for *Need for Speed: Most Wanted* (2005, PC).
