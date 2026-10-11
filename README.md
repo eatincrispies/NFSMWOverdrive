@@ -40,9 +40,3 @@ Fix.
 
 Visual Studio, `Release|Win32`. Output is `Release/NFSMWOverdrive.asi`. The
 `Debug|Win32` build is the same plugin with a log.
-
-| | |
-| --- | --- |
-| `src/dllmain.cpp` | entry point |
-| `src/NFSMW/transmission.hpp` | the game classes, with EA's names and layouts |
-| `src/NFSMW/transmission.cpp` | the ini, the 6th gear and the straight-cut whine |
