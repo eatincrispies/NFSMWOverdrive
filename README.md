@@ -35,23 +35,6 @@ Fix.
 | `[Gears] IncludeStock` | `0` | also give the 6th to cars with no gearbox upgrade |
 | `[Tranny] Enabled` | `1` | the straight-cut whine with the Ultimate transmission |
 
-## Cars
-
-There is no car list. At startup the plugin reads every car's `pvehicle`
-entry in the VLT, which lists the transmissions the game uses for that car:
-the stock set first, the fully upgraded set last. Every car with two different
-sets gets the 6th gear, so add-on cars work as soon as they have an upgraded
-gear set, whatever it is called.
-
-That also covers cars a name list could never find. The Impreza's stock gear
-set is not called `imprezawrx`, so it was missing from the old list; it is
-picked up now. Cars whose upgraded set has no extra gear, or that already have
-six, are left alone. The M3 GTR, SL65, Camaro and 911 GT2 ship fully specced
-with a single gear set, so there is nothing to draw from.
-
-The Debug build writes `NFSMWOverdrive.log` beside the `.asi`, listing every
-gear set pair it found and then each car as you drive it.
-
 
 ## Build
 
